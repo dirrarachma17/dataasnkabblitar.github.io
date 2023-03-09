@@ -1,0 +1,4580 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css"><link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title>Sistem Informasi Geografis Penyebaran ASN di Kabupaten Blitar</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script><script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="data/KabupatenBlitar_2.js"></script>
+        <script src="data/DataASNKABBlitar_3.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+            highlightLayer.openPopup();
+        }
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:1
+        }).fitBounds([[-8.18847346297664,111.98047088642961],[-7.889683439730823,112.5546303372749]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'feet',
+            secondaryLengthUnit: 'miles',
+            primaryAreaUnit: 'sqfeet',
+            secondaryAreaUnit: 'sqmiles'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+            map.setMaxBounds(map.getBounds());
+        }
+        map.createPane('pane_GoogleMaps_0');
+        map.getPane('pane_GoogleMaps_0').style.zIndex = 400;
+        var layer_GoogleMaps_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleMaps_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 18
+        });
+        layer_GoogleMaps_0;
+        map.addLayer(layer_GoogleMaps_0);
+        map.createPane('pane_GoogleSatelite_1');
+        map.getPane('pane_GoogleSatelite_1').style.zIndex = 401;
+        var layer_GoogleSatelite_1 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleSatelite_1',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 18
+        });
+        layer_GoogleSatelite_1;
+        map.addLayer(layer_GoogleSatelite_1);
+        function pop_KabupatenBlitar_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2"><strong>Desa</strong><br />' + (feature.properties['Desa'] !== null ? autolinker.link(feature.properties['Desa'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Luas Wilay</strong><br />' + (feature.properties['Luas Wilay'] !== null ? autolinker.link(feature.properties['Luas Wilay'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Kecamatan</strong><br />' + (feature.properties['Kecamatan'] !== null ? autolinker.link(feature.properties['Kecamatan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Kabupaten</strong><br />' + (feature.properties['Kabupaten'] !== null ? autolinker.link(feature.properties['Kabupaten'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Provinsi</strong><br />' + (feature.properties['Provinsi'] !== null ? autolinker.link(feature.properties['Provinsi'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_KabupatenBlitar_2_0(feature) {
+            switch(String(feature.properties['Desa'])) {
+                case 'AMPELGADING':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(250,250,250,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'ARJOSARI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(249,249,249,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'ARJOWILANGUN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(248,248,248,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'ARYOJEDING':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(247,247,247,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BABADAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(247,247,247,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BACEM':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(246,246,246,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BAGELENAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(245,245,245,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BAJANG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(244,244,244,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BAKUNG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(243,243,243,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BALEREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(242,242,242,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BALESARI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(241,241,241,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BANGGLE':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(241,241,241,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BANGSRI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(240,240,240,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BANJAREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(239,239,239,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BANJARSARI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(238,238,238,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BATUAJI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(237,237,237,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BEDALI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(236,236,236,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BENCE':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(235,235,235,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BENDO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(234,234,234,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BENDOREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(234,234,234,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BENDOSARI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(233,233,233,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BENDOSEWU':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(232,232,232,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BENDOWULUNG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(231,231,231,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BERU':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(230,230,230,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BESUKI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(229,229,229,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BINANGUN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(228,228,228,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BIROWO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(228,228,228,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BLITAR':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(227,227,227,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BORO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(226,226,226,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BULULAWANG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(225,225,225,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BUMIAYU':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(224,224,224,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BUMIREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(223,223,223,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BUNTARAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(222,222,222,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'BUTUN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(222,222,222,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'CANDIREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(221,221,221,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'DADAPLANGU':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(220,220,220,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'DANDONG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(219,219,219,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'DARUNGAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(218,218,218,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'DAWUHAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(217,217,217,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'DAYU':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(216,216,216,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'DEMUK':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,215,215,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'DERMOJAYAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,215,215,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'DEYENG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(214,214,214,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'DOKO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(213,213,213,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'DUREN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(212,212,212,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'GADUNGAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(211,211,211,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'GANDEKAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(210,210,210,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'GANDUSARI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(209,209,209,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'GAPRANG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(209,209,209,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'GARUM':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(208,208,208,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'GEDOG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(207,207,207,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'GEMBONGAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(206,206,206,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'GENENGAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(205,205,205,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'GLEDUG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(204,204,204,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'GOGODESO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(203,203,203,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'GONDANG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(203,203,203,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'GUNUNGGEDE':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(202,202,202,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JABUNG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(201,201,201,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JAJAR':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(200,200,200,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JAMBEPAWON':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(199,199,199,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JAMBEWANGI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(198,198,198,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JAMBUWER':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(197,197,197,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JATEN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(197,197,197,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JATI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(196,196,196,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JATILENGGER':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(195,195,195,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JATINOM':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(194,194,194,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JATITENGAH':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(193,193,193,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JEBLOG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(192,192,192,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JEDING':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(191,191,191,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JEGU':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(190,190,190,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JEMEKAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(190,190,190,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JIMBE':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(189,189,189,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JINGGLONG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(188,188,188,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JIWUT':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(187,187,187,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'JUGO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(186,186,186,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KADEMANGAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(185,185,185,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KALIBOTO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(184,184,184,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KALIGAMBIR':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(184,184,184,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KALIGRENJENG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(183,183,183,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KALIMANIS':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(182,182,182,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KALIPANG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(181,181,181,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KALIPUCUNG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(180,180,180,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KALIREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(179,179,179,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KALITENGAH':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(178,178,178,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KALIWUNGU':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(178,178,178,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KAMULAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(177,177,177,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KANDANGAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(176,176,176,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KANIGORO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(175,175,175,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KARANGBENDO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(174,174,174,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KARANGGAYAM':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(173,173,173,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KARANGGONDANG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(172,172,172,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KARANGKATES':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(171,171,171,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KARANGREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(171,171,171,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KARANGSONO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(170,170,170,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KARANGTENGAH':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(169,169,169,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KAULON':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(168,168,168,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KAUMAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(167,167,167,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KAWEDUSAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(166,166,166,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KAWERON':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(165,165,165,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KEBONAGUNG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(165,165,165,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KEBONDUREN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(164,164,164,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KEBONSARI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(163,163,163,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KEDAWUNG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(162,162,162,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KEDUNGBANTENG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(161,161,161,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KEDUNGBUNDER':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(160,160,160,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KEDUNGWUNGU':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(159,159,159,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KEHUTANAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(159,159,159,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KEMBANGARUM':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(158,158,158,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KEMIRIGEDE':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(157,157,157,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KEMLOKO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(156,156,156,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KENDALREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(155,155,155,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KERJEN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(154,154,154,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KESAMBEN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(153,153,153,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KLAMPOK':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(153,153,153,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KLEMUNAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(152,152,152,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KOLOMAYAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(151,151,151,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KOTES':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(150,150,150,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KRENCENG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(149,149,149,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KRISIK':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(148,148,148,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KUNINGAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(147,147,147,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'KUNIR':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(146,146,146,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'LANGON':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(146,146,146,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'LOREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(145,145,145,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'MALIRAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(144,144,144,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'MANDESAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(143,143,143,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'MANGGIS':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(142,142,142,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'MANGUNAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(141,141,141,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'MARGOURIP':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(140,140,140,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'MARON':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(140,140,140,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'MINGGIRSARI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(139,139,139,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'MODANGAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(138,138,138,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'MOJOREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(137,137,137,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'MORGOMULYO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(136,136,136,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'MRONJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(135,135,135,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'NGADIPURO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(134,134,134,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'NGADIREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(134,134,134,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'NGADIRENGGO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(133,133,133,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'NGADRI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(132,132,132,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'NGAGLIK':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(131,131,131,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'NGANTRU':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(130,130,130,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'NGARINGAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(129,129,129,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'NGEMBUL':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(128,128,128,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'NGENI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(128,128,128,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'NGLEGOK':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(127,127,127,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'NGORAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(126,126,126,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'NGRECO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(125,125,125,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'NGREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(124,124,124,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'NGRENDENG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(123,123,123,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'NGUNUT':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(122,122,122,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'OLAKALEN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(121,121,121,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PADANGAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(121,121,121,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PAGERGUNUNG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(120,120,120,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PAGERSARI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(119,119,119,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PAGERWOJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(118,118,118,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PAKEL':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(117,117,117,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PAKISAJI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(116,116,116,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PAKISREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(115,115,115,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PAKUNDEN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(115,115,115,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PANDANARUM':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(114,114,114,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PANDANSARI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(113,113,113,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PANGGUNGASRI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(112,112,112,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PANGGUNGDUWET':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(111,111,111,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PANGGUNGREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(110,110,110,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PAPUNGAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(109,109,109,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PASIRAMAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(109,109,109,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PASIRHARJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(108,108,108,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PIKATAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(107,107,107,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PLANDIREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(106,106,106,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PLOSO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(105,105,105,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PLOSOARANG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(104,104,104,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PLOSOREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(103,103,103,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PLUMBANGAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(102,102,102,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PLUMPUNGREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(102,102,102,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'POHGAJIH':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(101,101,101,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'POJOK':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(100,100,100,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PONGGOK':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(99,99,99,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'POPOH':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(98,98,98,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PUCANGLABAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(97,97,97,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PUCUNG LOR':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(96,96,96,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PUJON KIDUL':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(96,96,96,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PUJON LOR':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(95,95,95,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PULEREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(94,94,94,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PULOSARI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(93,93,93,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PULOTONDO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(92,92,92,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PURWOKERTO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(91,91,91,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'PURWOREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(90,90,90,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'REJOSARI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(90,90,90,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'REJOSO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(89,89,89,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'REJOTANGAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(88,88,88,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'REJOWINANGUN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(87,87,87,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'REMBANG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(86,86,86,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RESAPOMBO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(85,85,85,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RINGINANOM':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(84,84,84,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RINGINANYAR':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(84,84,84,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RINGINREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(83,83,83,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SALAM':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(82,82,82,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SALAMREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(81,81,81,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SAMBIGEDE':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(80,80,80,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SANAN KULON':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(79,79,79,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SANAN WETAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(78,78,78,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SATAK':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(77,77,77,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SATREJAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(77,77,77,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SAWENTAR':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(76,76,76,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SELOKAJANG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(75,75,75,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SELOPURO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(74,74,74,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SELOREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(73,73,73,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SEMEN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(72,72,72,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SEMPU':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(71,71,71,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SENTUL':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(71,71,71,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SERANG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(70,70,70,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SETONOREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(69,69,69,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SIDODADI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(68,68,68,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SIDOMULYO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(67,67,67,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SIDOREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(66,66,66,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SIRAMAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(65,65,65,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SLEMANAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(65,65,65,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SLOROK':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(64,64,64,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SLUMBUNG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(63,63,63,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SOSO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(62,62,62,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SRAGI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(61,61,61,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SRENGAT':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(60,60,60,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SRIKATON':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(59,59,59,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUGIHWARAS':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(58,58,58,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUKEREJO WETAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(58,58,58,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUKOANYAR':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(57,57,57,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUKOMULYO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(56,56,56,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUKORAME':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(55,55,55,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUKOREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(54,54,54,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUKOSEWU':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(53,53,53,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUKOWILANGUN BARAT':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(52,52,52,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBER':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(52,52,52,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBERAGUNG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(51,51,51,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBERARUM':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(50,50,50,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBERASRI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(49,49,49,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBERBENDO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(48,48,48,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBERBOTO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(47,47,47,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBERDADAP':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(46,46,46,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBERDADI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(46,46,46,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBERDEM':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(45,45,45,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBERDIREN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(44,44,44,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBEREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(43,43,43,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBERINGIN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(42,42,42,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBERJATI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(41,41,41,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBERJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(40,40,40,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBERKEMBAR':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(40,40,40,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBEROTO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(39,39,39,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBERSARI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(38,38,38,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBERSIH':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(37,37,37,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUMBERURIP':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(36,36,36,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SURU':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(35,35,35,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SURUHWADANG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(34,34,34,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'SUTOJAYAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(33,33,33,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TALUN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(33,33,33,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TAMBAKAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(32,32,32,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TAMBAKREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(31,31,31,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TANEN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(30,30,30,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TANGGUNG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(29,29,29,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TANGKIL':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(28,28,28,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TAPAKREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(27,27,27,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TAWANGREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(27,27,27,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TAWANGSARI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(26,26,26,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TEGALREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(25,25,25,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TEGALSARI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(24,24,24,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TEMBALANG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(23,23,23,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TEMENGGUNGAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(22,22,22,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TEPAS':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(21,21,21,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TINGGAL':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(21,21,21,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TLOGO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(20,20,20,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TLUMPU':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(19,19,19,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TOGOGAN':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(18,18,18,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TUGUREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(17,17,17,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TULISKRIYO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(16,16,16,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TULUNGREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(15,15,15,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TUMPAKEPUH':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(14,14,14,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TUMPAKOYOT':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(14,14,14,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TUMPANG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(13,13,13,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'TUNJUNG':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(12,12,12,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'UMBULDAMAR':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(11,11,11,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'WATES':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(10,10,10,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'WLINGI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(9,9,9,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'WONODADI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(8,8,8,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'WONOREJO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(8,8,8,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'WONOSARI':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(7,7,7,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'WONOTIRTO':
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(6,6,6,1.0)',
+                interactive: true,
+            }
+                    break;
+                default:
+                    return {
+                pane: 'pane_KabupatenBlitar_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(5,5,5,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_KabupatenBlitar_2');
+        map.getPane('pane_KabupatenBlitar_2').style.zIndex = 402;
+        map.getPane('pane_KabupatenBlitar_2').style['mix-blend-mode'] = 'normal';
+        var layer_KabupatenBlitar_2 = new L.geoJson(json_KabupatenBlitar_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_KabupatenBlitar_2',
+            layerName: 'layer_KabupatenBlitar_2',
+            pane: 'pane_KabupatenBlitar_2',
+            onEachFeature: pop_KabupatenBlitar_2,
+            style: style_KabupatenBlitar_2_0,
+        });
+        bounds_group.addLayer(layer_KabupatenBlitar_2);
+        map.addLayer(layer_KabupatenBlitar_2);
+        function pop_DataASNKABBlitar_3(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['fid'] !== null ? autolinker.link(feature.properties['fid'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>NIP</strong><br />' + (feature.properties['NIP'] !== null ? autolinker.link(feature.properties['NIP'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>NAMA PEGAWAI</strong><br />' + (feature.properties['NAMA PEGAWAI'] !== null ? autolinker.link(feature.properties['NAMA PEGAWAI'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>AGAMA</strong><br />' + (feature.properties['AGAMA'] !== null ? autolinker.link(feature.properties['AGAMA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>TEMPAT LAHIR</strong><br />' + (feature.properties['TEMPAT LAHIR'] !== null ? autolinker.link(feature.properties['TEMPAT LAHIR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>JK</strong><br />' + (feature.properties['JK'] !== null ? autolinker.link(feature.properties['JK'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>GLN</strong><br />' + (feature.properties['GLN'] !== null ? autolinker.link(feature.properties['GLN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>JABATAN</strong><br />' + (feature.properties['JABATAN'] !== null ? autolinker.link(feature.properties['JABATAN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>JENIS JABATAN</strong><br />' + (feature.properties['JENIS JABATAN'] !== null ? autolinker.link(feature.properties['JENIS JABATAN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>TGL LAHIR</strong><br />' + (feature.properties['TGL LAHIR'] !== null ? autolinker.link(feature.properties['TGL LAHIR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_DataASNKABBlitar_3_0() {
+            return {
+                pane: 'pane_DataASNKABBlitar_3',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/red-marker.svg',
+            iconSize: [38.0, 38.0]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_DataASNKABBlitar_3');
+        map.getPane('pane_DataASNKABBlitar_3').style.zIndex = 403;
+        map.getPane('pane_DataASNKABBlitar_3').style['mix-blend-mode'] = 'normal';
+        var layer_DataASNKABBlitar_3 = new L.geoJson(json_DataASNKABBlitar_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_DataASNKABBlitar_3',
+            layerName: 'layer_DataASNKABBlitar_3',
+            pane: 'pane_DataASNKABBlitar_3',
+            onEachFeature: pop_DataASNKABBlitar_3,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_DataASNKABBlitar_3_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_DataASNKABBlitar_3);
+        map.addLayer(layer_DataASNKABBlitar_3);
+            var title = new L.Control();
+            title.onAdd = function (map) {
+                this._div = L.DomUtil.create('div', 'info');
+                this.update();
+                return this._div;
+            };
+            title.update = function () {
+                this._div.innerHTML = '<h2>Sistem Informasi Geografis Penyebaran ASN di Kabupaten Blitar</h2>';
+            };
+            title.addTo(map);
+            var abstract = new L.Control({'position':'bottomleft'});
+            abstract.onAdd = function (map) {
+                this._div = L.DomUtil.create('div',
+                'leaflet-control abstract');
+                this._div.id = 'abstract'
+
+                    abstract.show();
+                    return this._div;
+                };
+                abstract.show = function () {
+                    this._div.classList.remove("abstract");
+                    this._div.classList.add("abstractUncollapsed");
+                    this._div.innerHTML = 'Berikut ini merupakan peta data Aparatur Sipil Negara yang bertugas di seluruh wilayah Kabupaten Blitar';
+            };
+            abstract.addTo(map);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var baseMaps = {};
+        L.control.layers(baseMaps,{'<img src="legend/DataASNKABBlitar_3.png" /> Data ASN KAB. Blitar ': layer_DataASNKABBlitar_3,'Kabupaten Blitar<br /><table><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_AMPELGADING0.png" /></td><td>AMPELGADING</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_ARJOSARI1.png" /></td><td>ARJOSARI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_ARJOWILANGUN2.png" /></td><td>ARJOWILANGUN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_ARYOJEDING3.png" /></td><td>ARYOJEDING</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BABADAN4.png" /></td><td>BABADAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BACEM5.png" /></td><td>BACEM</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BAGELENAN6.png" /></td><td>BAGELENAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BAJANG7.png" /></td><td>BAJANG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BAKUNG8.png" /></td><td>BAKUNG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BALEREJO9.png" /></td><td>BALEREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BALESARI10.png" /></td><td>BALESARI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BANGGLE11.png" /></td><td>BANGGLE</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BANGSRI12.png" /></td><td>BANGSRI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BANJAREJO13.png" /></td><td>BANJAREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BANJARSARI14.png" /></td><td>BANJARSARI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BATUAJI15.png" /></td><td>BATUAJI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BEDALI16.png" /></td><td>BEDALI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BENCE17.png" /></td><td>BENCE</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BENDO18.png" /></td><td>BENDO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BENDOREJO19.png" /></td><td>BENDOREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BENDOSARI20.png" /></td><td>BENDOSARI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BENDOSEWU21.png" /></td><td>BENDOSEWU</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BENDOWULUNG22.png" /></td><td>BENDOWULUNG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BERU23.png" /></td><td>BERU</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BESUKI24.png" /></td><td>BESUKI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BINANGUN25.png" /></td><td>BINANGUN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BIROWO26.png" /></td><td>BIROWO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BLITAR27.png" /></td><td>BLITAR</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BORO28.png" /></td><td>BORO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BULULAWANG29.png" /></td><td>BULULAWANG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BUMIAYU30.png" /></td><td>BUMIAYU</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BUMIREJO31.png" /></td><td>BUMIREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BUNTARAN32.png" /></td><td>BUNTARAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_BUTUN33.png" /></td><td>BUTUN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_CANDIREJO34.png" /></td><td>CANDIREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_DADAPLANGU35.png" /></td><td>DADAPLANGU</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_DANDONG36.png" /></td><td>DANDONG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_DARUNGAN37.png" /></td><td>DARUNGAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_DAWUHAN38.png" /></td><td>DAWUHAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_DAYU39.png" /></td><td>DAYU</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_DEMUK40.png" /></td><td>DEMUK</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_DERMOJAYAN41.png" /></td><td>DERMOJAYAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_DEYENG42.png" /></td><td>DEYENG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_DOKO43.png" /></td><td>DOKO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_DUREN44.png" /></td><td>DUREN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_GADUNGAN45.png" /></td><td>GADUNGAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_GANDEKAN46.png" /></td><td>GANDEKAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_GANDUSARI47.png" /></td><td>GANDUSARI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_GAPRANG48.png" /></td><td>GAPRANG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_GARUM49.png" /></td><td>GARUM</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_GEDOG50.png" /></td><td>GEDOG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_GEMBONGAN51.png" /></td><td>GEMBONGAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_GENENGAN52.png" /></td><td>GENENGAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_GLEDUG53.png" /></td><td>GLEDUG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_GOGODESO54.png" /></td><td>GOGODESO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_GONDANG55.png" /></td><td>GONDANG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_GUNUNGGEDE56.png" /></td><td>GUNUNGGEDE</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JABUNG57.png" /></td><td>JABUNG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JAJAR58.png" /></td><td>JAJAR</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JAMBEPAWON59.png" /></td><td>JAMBEPAWON</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JAMBEWANGI60.png" /></td><td>JAMBEWANGI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JAMBUWER61.png" /></td><td>JAMBUWER</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JATEN62.png" /></td><td>JATEN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JATI63.png" /></td><td>JATI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JATILENGGER64.png" /></td><td>JATILENGGER</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JATINOM65.png" /></td><td>JATINOM</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JATITENGAH66.png" /></td><td>JATITENGAH</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JEBLOG67.png" /></td><td>JEBLOG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JEDING68.png" /></td><td>JEDING</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JEGU69.png" /></td><td>JEGU</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JEMEKAN70.png" /></td><td>JEMEKAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JIMBE71.png" /></td><td>JIMBE</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JINGGLONG72.png" /></td><td>JINGGLONG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JIWUT73.png" /></td><td>JIWUT</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_JUGO74.png" /></td><td>JUGO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KADEMANGAN75.png" /></td><td>KADEMANGAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KALIBOTO76.png" /></td><td>KALIBOTO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KALIGAMBIR77.png" /></td><td>KALIGAMBIR</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KALIGRENJENG78.png" /></td><td>KALIGRENJENG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KALIMANIS79.png" /></td><td>KALIMANIS</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KALIPANG80.png" /></td><td>KALIPANG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KALIPUCUNG81.png" /></td><td>KALIPUCUNG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KALIREJO82.png" /></td><td>KALIREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KALITENGAH83.png" /></td><td>KALITENGAH</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KALIWUNGU84.png" /></td><td>KALIWUNGU</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KAMULAN85.png" /></td><td>KAMULAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KANDANGAN86.png" /></td><td>KANDANGAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KANIGORO87.png" /></td><td>KANIGORO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KARANGBENDO88.png" /></td><td>KARANGBENDO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KARANGGAYAM89.png" /></td><td>KARANGGAYAM</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KARANGGONDANG90.png" /></td><td>KARANGGONDANG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KARANGKATES91.png" /></td><td>KARANGKATES</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KARANGREJO92.png" /></td><td>KARANGREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KARANGSONO93.png" /></td><td>KARANGSONO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KARANGTENGAH94.png" /></td><td>KARANGTENGAH</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KAULON95.png" /></td><td>KAULON</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KAUMAN96.png" /></td><td>KAUMAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KAWEDUSAN97.png" /></td><td>KAWEDUSAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KAWERON98.png" /></td><td>KAWERON</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KEBONAGUNG99.png" /></td><td>KEBONAGUNG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KEBONDUREN100.png" /></td><td>KEBONDUREN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KEBONSARI101.png" /></td><td>KEBONSARI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KEDAWUNG102.png" /></td><td>KEDAWUNG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KEDUNGBANTENG103.png" /></td><td>KEDUNGBANTENG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KEDUNGBUNDER104.png" /></td><td>KEDUNGBUNDER</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KEDUNGWUNGU105.png" /></td><td>KEDUNGWUNGU</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KEHUTANAN106.png" /></td><td>KEHUTANAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KEMBANGARUM107.png" /></td><td>KEMBANGARUM</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KEMIRIGEDE108.png" /></td><td>KEMIRIGEDE</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KEMLOKO109.png" /></td><td>KEMLOKO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KENDALREJO110.png" /></td><td>KENDALREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KERJEN111.png" /></td><td>KERJEN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KESAMBEN112.png" /></td><td>KESAMBEN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KLAMPOK113.png" /></td><td>KLAMPOK</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KLEMUNAN114.png" /></td><td>KLEMUNAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KOLOMAYAN115.png" /></td><td>KOLOMAYAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KOTES116.png" /></td><td>KOTES</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KRENCENG117.png" /></td><td>KRENCENG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KRISIK118.png" /></td><td>KRISIK</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KUNINGAN119.png" /></td><td>KUNINGAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_KUNIR120.png" /></td><td>KUNIR</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_LANGON121.png" /></td><td>LANGON</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_LOREJO122.png" /></td><td>LOREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_MALIRAN123.png" /></td><td>MALIRAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_MANDESAN124.png" /></td><td>MANDESAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_MANGGIS125.png" /></td><td>MANGGIS</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_MANGUNAN126.png" /></td><td>MANGUNAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_MARGOURIP127.png" /></td><td>MARGOURIP</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_MARON128.png" /></td><td>MARON</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_MINGGIRSARI129.png" /></td><td>MINGGIRSARI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_MODANGAN130.png" /></td><td>MODANGAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_MOJOREJO131.png" /></td><td>MOJOREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_MORGOMULYO132.png" /></td><td>MORGOMULYO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_MRONJO133.png" /></td><td>MRONJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_NGADIPURO134.png" /></td><td>NGADIPURO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_NGADIREJO135.png" /></td><td>NGADIREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_NGADIRENGGO136.png" /></td><td>NGADIRENGGO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_NGADRI137.png" /></td><td>NGADRI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_NGAGLIK138.png" /></td><td>NGAGLIK</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_NGANTRU139.png" /></td><td>NGANTRU</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_NGARINGAN140.png" /></td><td>NGARINGAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_NGEMBUL141.png" /></td><td>NGEMBUL</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_NGENI142.png" /></td><td>NGENI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_NGLEGOK143.png" /></td><td>NGLEGOK</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_NGORAN144.png" /></td><td>NGORAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_NGRECO145.png" /></td><td>NGRECO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_NGREJO146.png" /></td><td>NGREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_NGRENDENG147.png" /></td><td>NGRENDENG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_NGUNUT148.png" /></td><td>NGUNUT</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_OLAKALEN149.png" /></td><td>OLAKALEN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PADANGAN150.png" /></td><td>PADANGAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PAGERGUNUNG151.png" /></td><td>PAGERGUNUNG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PAGERSARI152.png" /></td><td>PAGERSARI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PAGERWOJO153.png" /></td><td>PAGERWOJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PAKEL154.png" /></td><td>PAKEL</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PAKISAJI155.png" /></td><td>PAKISAJI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PAKISREJO156.png" /></td><td>PAKISREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PAKUNDEN157.png" /></td><td>PAKUNDEN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PANDANARUM158.png" /></td><td>PANDANARUM</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PANDANSARI159.png" /></td><td>PANDANSARI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PANGGUNGASRI160.png" /></td><td>PANGGUNGASRI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PANGGUNGDUWET161.png" /></td><td>PANGGUNGDUWET</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PANGGUNGREJO162.png" /></td><td>PANGGUNGREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PAPUNGAN163.png" /></td><td>PAPUNGAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PASIRAMAN164.png" /></td><td>PASIRAMAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PASIRHARJO165.png" /></td><td>PASIRHARJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PIKATAN166.png" /></td><td>PIKATAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PLANDIREJO167.png" /></td><td>PLANDIREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PLOSO168.png" /></td><td>PLOSO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PLOSOARANG169.png" /></td><td>PLOSOARANG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PLOSOREJO170.png" /></td><td>PLOSOREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PLUMBANGAN171.png" /></td><td>PLUMBANGAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PLUMPUNGREJO172.png" /></td><td>PLUMPUNGREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_POHGAJIH173.png" /></td><td>POHGAJIH</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_POJOK174.png" /></td><td>POJOK</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PONGGOK175.png" /></td><td>PONGGOK</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_POPOH176.png" /></td><td>POPOH</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PUCANGLABAN177.png" /></td><td>PUCANGLABAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PUCUNGLOR178.png" /></td><td>PUCUNG LOR</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PUJONKIDUL179.png" /></td><td>PUJON KIDUL</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PUJONLOR180.png" /></td><td>PUJON LOR</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PULEREJO181.png" /></td><td>PULEREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PULOSARI182.png" /></td><td>PULOSARI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PULOTONDO183.png" /></td><td>PULOTONDO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PURWOKERTO184.png" /></td><td>PURWOKERTO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_PURWOREJO185.png" /></td><td>PURWOREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_REJOSARI186.png" /></td><td>REJOSARI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_REJOSO187.png" /></td><td>REJOSO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_REJOTANGAN188.png" /></td><td>REJOTANGAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_REJOWINANGUN189.png" /></td><td>REJOWINANGUN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_REMBANG190.png" /></td><td>REMBANG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_RESAPOMBO191.png" /></td><td>RESAPOMBO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_RINGINANOM192.png" /></td><td>RINGINANOM</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_RINGINANYAR193.png" /></td><td>RINGINANYAR</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_RINGINREJO194.png" /></td><td>RINGINREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SALAM195.png" /></td><td>SALAM</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SALAMREJO196.png" /></td><td>SALAMREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SAMBIGEDE197.png" /></td><td>SAMBIGEDE</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SANANKULON198.png" /></td><td>SANAN KULON</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SANANWETAN199.png" /></td><td>SANAN WETAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SATAK200.png" /></td><td>SATAK</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SATREJAN201.png" /></td><td>SATREJAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SAWENTAR202.png" /></td><td>SAWENTAR</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SELOKAJANG203.png" /></td><td>SELOKAJANG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SELOPURO204.png" /></td><td>SELOPURO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SELOREJO205.png" /></td><td>SELOREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SEMEN206.png" /></td><td>SEMEN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SEMPU207.png" /></td><td>SEMPU</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SENTUL208.png" /></td><td>SENTUL</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SERANG209.png" /></td><td>SERANG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SETONOREJO210.png" /></td><td>SETONOREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SIDODADI211.png" /></td><td>SIDODADI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SIDOMULYO212.png" /></td><td>SIDOMULYO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SIDOREJO213.png" /></td><td>SIDOREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SIRAMAN214.png" /></td><td>SIRAMAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SLEMANAN215.png" /></td><td>SLEMANAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SLOROK216.png" /></td><td>SLOROK</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SLUMBUNG217.png" /></td><td>SLUMBUNG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SOSO218.png" /></td><td>SOSO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SRAGI219.png" /></td><td>SRAGI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SRENGAT220.png" /></td><td>SRENGAT</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SRIKATON221.png" /></td><td>SRIKATON</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUGIHWARAS222.png" /></td><td>SUGIHWARAS</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUKEREJOWETAN223.png" /></td><td>SUKEREJO WETAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUKOANYAR224.png" /></td><td>SUKOANYAR</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUKOMULYO225.png" /></td><td>SUKOMULYO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUKORAME226.png" /></td><td>SUKORAME</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUKOREJO227.png" /></td><td>SUKOREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUKOSEWU228.png" /></td><td>SUKOSEWU</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUKOWILANGUNBARAT229.png" /></td><td>SUKOWILANGUN BARAT</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBER230.png" /></td><td>SUMBER</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBERAGUNG231.png" /></td><td>SUMBERAGUNG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBERARUM232.png" /></td><td>SUMBERARUM</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBERASRI233.png" /></td><td>SUMBERASRI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBERBENDO234.png" /></td><td>SUMBERBENDO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBERBOTO235.png" /></td><td>SUMBERBOTO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBERDADAP236.png" /></td><td>SUMBERDADAP</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBERDADI237.png" /></td><td>SUMBERDADI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBERDEM238.png" /></td><td>SUMBERDEM</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBERDIREN239.png" /></td><td>SUMBERDIREN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBEREJO240.png" /></td><td>SUMBEREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBERINGIN241.png" /></td><td>SUMBERINGIN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBERJATI242.png" /></td><td>SUMBERJATI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBERJO243.png" /></td><td>SUMBERJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBERKEMBAR244.png" /></td><td>SUMBERKEMBAR</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBEROTO245.png" /></td><td>SUMBEROTO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBERSARI246.png" /></td><td>SUMBERSARI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBERSIH247.png" /></td><td>SUMBERSIH</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUMBERURIP248.png" /></td><td>SUMBERURIP</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SURU249.png" /></td><td>SURU</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SURUHWADANG250.png" /></td><td>SURUHWADANG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_SUTOJAYAN251.png" /></td><td>SUTOJAYAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TALUN252.png" /></td><td>TALUN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TAMBAKAN253.png" /></td><td>TAMBAKAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TAMBAKREJO254.png" /></td><td>TAMBAKREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TANEN255.png" /></td><td>TANEN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TANGGUNG256.png" /></td><td>TANGGUNG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TANGKIL257.png" /></td><td>TANGKIL</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TAPAKREJO258.png" /></td><td>TAPAKREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TAWANGREJO259.png" /></td><td>TAWANGREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TAWANGSARI260.png" /></td><td>TAWANGSARI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TEGALREJO261.png" /></td><td>TEGALREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TEGALSARI262.png" /></td><td>TEGALSARI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TEMBALANG263.png" /></td><td>TEMBALANG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TEMENGGUNGAN264.png" /></td><td>TEMENGGUNGAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TEPAS265.png" /></td><td>TEPAS</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TINGGAL266.png" /></td><td>TINGGAL</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TLOGO267.png" /></td><td>TLOGO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TLUMPU268.png" /></td><td>TLUMPU</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TOGOGAN269.png" /></td><td>TOGOGAN</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TUGUREJO270.png" /></td><td>TUGUREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TULISKRIYO271.png" /></td><td>TULISKRIYO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TULUNGREJO272.png" /></td><td>TULUNGREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TUMPAKEPUH273.png" /></td><td>TUMPAKEPUH</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TUMPAKOYOT274.png" /></td><td>TUMPAKOYOT</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TUMPANG275.png" /></td><td>TUMPANG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_TUNJUNG276.png" /></td><td>TUNJUNG</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_UMBULDAMAR277.png" /></td><td>UMBULDAMAR</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_WATES278.png" /></td><td>WATES</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_WLINGI279.png" /></td><td>WLINGI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_WONODADI280.png" /></td><td>WONODADI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_WONOREJO281.png" /></td><td>WONOREJO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_WONOSARI282.png" /></td><td>WONOSARI</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_WONOTIRTO283.png" /></td><td>WONOTIRTO</td></tr><tr><td style="text-align: center;"><img src="legend/KabupatenBlitar_2_284.png" /></td><td></td></tr></table>': layer_KabupatenBlitar_2,"Google Satelite": layer_GoogleSatelite_1,"Google Maps": layer_GoogleMaps_0,}).addTo(map);
+        setBounds();
+        var i = 0;
+        layer_KabupatenBlitar_2.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Desa'] !== null?String('<div style="color: #ffffff; font-size: 13pt; font-weight: bold; font-family: \'Open Sans ExtraBold\', sans-serif;">' + layer.feature.properties['Desa']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_KabupatenBlitar_2'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        resetLabels([layer_KabupatenBlitar_2]);
+        map.on("zoomend", function(){
+            resetLabels([layer_KabupatenBlitar_2]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_KabupatenBlitar_2]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_KabupatenBlitar_2]);
+        });
+        </script>
+    </body>
+</html>
